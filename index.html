@@ -1,510 +1,723 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistem Deteksi Citra Digital - Sobel</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Deteksi Citra - Sobel Dashboard Ultimate</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+            --sidebar-color: rgba(15, 23, 42, 0.6);
+            --card-color: rgba(30, 41, 59, 0.7);
+            --accent-primary: #3b82f6;
+            --accent-neon: #00f2fe;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
 
-<style>
-*{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
 
-body{
-    background: #f1f5f9;
-    color: #334155;
-}
+        body {
+            background: var(--bg-gradient);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-/* LOGIN */
-#loginPage{
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-}
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
-.login-box{
-    width: 100%;
-    max-width: 400px;
-    background: white;
-    padding: 40px 30px;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,.3);
-}
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-color);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 35px;
+            z-index: 10;
+        }
 
-.login-box h2{
-    text-align: center;
-    margin-bottom: 25px;
-    color: #1e293b;
-    font-weight: 600;
-}
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
 
-.login-box input{
-    width: 100%;
-    padding: 12px;
-    margin: 10px 0;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    outline: none;
-    transition: 0.3s;
-}
+        .brand i {
+            color: var(--accent-neon);
+        }
 
-.login-box input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-}
+        .menu-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
 
-.login-box button{
-    width: 100%;
-    padding: 12px;
-    border: none;
-    background: #3b82f6;
-    color: white;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-top: 15px;
-    transition: 0.2s;
-}
+        .menu-item a {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.4s ease;
+            cursor: pointer;
+        }
 
-.login-box button:hover {
-    background: #2563eb;
-}
+        .menu-item.active a, .menu-item a:hover {
+            color: #ffffff;
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(0, 242, 254, 0.05) 100%);
+            border-left: 4px solid var(--accent-neon);
+            padding-left: 22px;
+        }
 
-/* DASHBOARD */
-#dashboard{
-    display: none;
-}
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            overflow-y: auto;
+        }
 
-.sidebar{
-    width: 260px;
-    height: 100vh;
-    background: #0f172a;
-    color: #94a3b8;
-    position: fixed;
-    display: flex;
-    flex-direction: column;
-}
+        .dashboard-view {
+            display: none;
+            flex-direction: column;
+            gap: 30px;
+            animation: fadeInUp 0.4s ease forwards;
+        }
 
-.sidebar h2{
-    text-align: center;
-    padding: 25px 20px;
-    background: #1e293b;
-    color: white;
-    font-size: 1.2rem;
-    letter-spacing: 1px;
-}
+        .dashboard-view.active-view {
+            display: flex;
+        }
 
-.sidebar ul{
-    list-style: none;
-    margin-top: 10px;
-}
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-.sidebar ul li{
-    padding: 15px 25px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    transition: 0.2s;
-}
+        header .title h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
-.sidebar ul li:hover, .sidebar ul li.active{
-    background: #1e293b;
-    color: white;
-}
+        header .title p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
 
-.sidebar ul li.logout{
-    margin-top: auto;
-    background: #b91c1c;
-    color: white;
-}
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 30px;
+            align-items: start;
+        }
 
-.sidebar ul li.logout:hover {
-    background: #991b1b;
-}
+        .panel-card {
+            background: var(--card-color);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+        }
 
-.content{
-    margin-left: 260px;
-    padding: 40px;
-    min-height: 100vh;
-}
+        .panel-card h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 12px;
+        }
 
-.header{
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,.05);
-    margin-bottom: 30px;
-}
+        .control-group {
+            margin-bottom: 20px;
+        }
 
-.header h1 {
-    color: #0f172a;
-    font-size: 1.8rem;
-    margin-bottom: 5px;
-}
+        .control-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
 
-.header p {
-    color: #64748b;
-}
+        .upload-box {
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 25px 15px;
+            text-align: center;
+            cursor: pointer;
+            background: rgba(255,255,255,0.02);
+            transition: all 0.3s;
+        }
 
-.card{
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,.05);
-}
+        .upload-box:hover {
+            border-color: var(--accent-neon);
+            background: rgba(0, 242, 254, 0.05);
+        }
 
-.card h2 {
-    margin-bottom: 20px;
-    color: #1e293b;
-    border-bottom: 2px solid #f1f5f9;
-    padding-bottom: 10px;
-}
+        .upload-box i {
+            font-size: 32px;
+            color: var(--accent-neon);
+            margin-bottom: 10px;
+        }
 
-/* CANVAS & PROSES STYLING */
-.canvas-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    margin-top: 20px;
-}
+        .range-slider {
+            width: 100%;
+            accent-color: var(--accent-neon);
+        }
 
-.canvas-box {
-    flex: 1;
-    min-width: 300px;
-    text-align: center;
-}
+        .slider-val {
+            float: right;
+            color: var(--accent-neon);
+            font-weight: 600;
+        }
 
-.canvas-box p {
-    font-weight: bold;
-    margin-bottom: 8px;
-    color: #475569;
-}
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+        }
 
-canvas {
-    max-width: 100%;
-    height: auto;
-    background: #e2e8f0;
-    border-radius: 8px;
-    border: 2px dashed #cbd5e1;
-}
+        .switch input { display:none; }
 
-.btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: 0.2s;
-}
+        .slider-toggle {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #475569;
+            transition: .4s;
+            border-radius: 34px;
+        }
 
-.btn-primary { background: #3b82f6; color: white; }
-.btn-primary:hover { background: #2563eb; }
-.btn-success { background: #10b981; color: white; }
-.btn-success:hover { background: #059669; }
+        .slider-toggle:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
 
-input[type="file"] {
-    padding: 10px;
-    background: #f8fafc;
-    border: 1px dashed #cbd5e1;
-    border-radius: 6px;
-    width: 100%;
-    margin-bottom: 20px;
-}
+        input:checked + .slider-toggle { background-color: var(--accent-primary); }
+        input:checked + .slider-toggle:before { transform: translateX(22px); }
 
-/* TABLE STYLING */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-}
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.03);
+            padding: 12px;
+            border-radius: 10px;
+        }
 
-table th, table td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #e2e8f0;
-}
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
 
-table th {
-    background: #f8fafc;
-    color: #334155;
-}
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
 
-/* PRINT MODE */
-@media print {
-    .sidebar, .header, .btn, input[type="file"], h2 {
-        display: none !important;
-    }
-    .content {
-        margin-left: 0 !important;
-        padding: 0 !important;
-    }
-    .card {
-        box-shadow: none !important;
-        padding: 0 !important;
-    }
-}
-</style>
+        .btn:disabled {
+            background: #475569;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .canvas-container-box {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        canvas {
+            max-width: 100%;
+            max-height: 400px;
+            background: #0b0f19;
+            border-radius: 8px;
+        }
+
+        /* TABLES & TEXT */
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .matrix-table th, .matrix-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .matrix-table th {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--text-main);
+        }
+
+        .info-text {
+            color: var(--text-muted);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .gallery-item-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            padding: 12px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .gallery-item-card img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 10px;
+            background: #000;
+        }
+    </style>
 </head>
 <body>
 
-<div id="loginPage">
-    <div class="login-box">
-        <h2>Login Sistem</h2>
-        <input type="text" id="username" placeholder="Username (admin)">
-        <input type="password" id="password" placeholder="Password (12345)">
-        <button onclick="login()">Login</button>
-    </div>
-</div>
-
-<div id="dashboard">
-
     <div class="sidebar">
-        <h2>Citra Sobel</h2>
-        <ul>
-            <li id="menu-home" class="active" onclick="showPage('home')">🏠 Home</li>
-            <li id="menu-sobel" onclick="showPage('sobel')">🖼 Deteksi Sobel</li>
-            <li id="menu-laporan" onclick="showPage('laporan')">📄 Laporan</li>
-            <li id="menu-about" onclick="showPage('about')">ℹ Tentang</li>
-        </ul>
-        <ul style="margin-top: auto;">
-            <li class="logout" onclick="logout()">🚪 Logout</li>
+        <div class="brand">
+            <i class="fa-solid fa-bolt"></i>
+            <span>Sobel Vision</span>
+        </div>
+        <ul class="menu-list">
+            <li class="menu-item active" data-target="view-dashboard">
+                <a><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+            </li>
+            <li class="menu-item" data-target="view-galeri">
+                <a><i class="fa-solid fa-images"></i> Galeri Unduhan</a>
+            </li>
+            <li class="menu-item" data-target="view-laporan">
+                <a><i class="fa-solid fa-file-invoice"></i> Laporan</a>
+            </li>
+            <li class="menu-item" data-target="view- ">
+                <a><i class="fa-solid fa-circle-info"></i> Tentang</a>
+            </li>
         </ul>
     </div>
 
-    <div class="content">
-
-        <div class="header">
-            <h1>Sistem Deteksi Citra Digital</h1>
-            <p>Metode Sobel Edge Detection</p>
-        </div>
-
-        <div id="home" class="card">
-            <h2>Home</h2>
-            <p>Selamat datang di Aplikasi Sistem Deteksi Citra Digital menggunakan Metode Sobel.</p>
-            <p style="margin-top: 10px; color: #64748b;">Silahkan pilih menu <b>Deteksi Sobel</b> di samping untuk memulai pengolahan gambar.</p>
-        </div>
-
-        <div id="sobel" class="card" style="display:none;">
-            <h2>Deteksi Tepi Sobel</h2>
-            <input type="file" id="imageInput" accept="image/*">
-            
-            <button class="btn btn-primary" onclick="applySobel()">⚡ Proses Sobel</button>
-
-            <div class="canvas-container">
-                <div class="canvas-box">
-                    <p>Gambar Asli</p>
-                    <canvas id="originalCanvas"></canvas>
+    <div class="main-content">
+        
+        <div id="view-dashboard" class="dashboard-view active-view">
+            <header>
+                <div class="title">
+                    <h1>Dashboard Deteksi Tepi Sobel</h1>
+                    <p>Ekstraksi kontur dan tepi citra berbasis HTML5 Canvas API</p>
                 </div>
-                <div class="canvas-box">
-                    <p>Hasil Operator Sobel</p>
-                    <canvas id="sobelCanvas"></canvas>
+            </header>
+
+            <div class="dashboard-grid">
+                <div class="panel-card">
+                    <h2><i class="fa-solid fa-sliders"></i> Pengaturan</h2>
+                    <div class="control-group">
+                        <label>Input Citra</label>
+                        <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <p id="uploadText">Pilih foto di sini</p>
+                            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>Ambang Batas (Threshold) <span class="slider-val" id="threshVal">50</span></label>
+                        <input type="range" min="0" max="255" value="50" class="range-slider" id="thresholdSlider">
+                    </div>
+                    <div class="control-group">
+                        <div class="toggle-container">
+                            <label style="margin-bottom:0; font-weight: 600; color: #fff;">Invert Warna Citra</label>
+                            <label class="switch">
+                                <input type="checkbox" id="invertToggle">
+                                <span class="slider-toggle"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" id="downloadBtn" disabled><i class="fa-solid fa-download"></i> Simpan Hasil</button>
+                </div>
+
+                <div class="workspace-grid">
+                    <div class="canvas-container-box">
+                        <h3><i class="fa-solid fa-image"></i> Citra Asli</h3>
+                        <canvas id="canvasOriginal"></canvas>
+                    </div>
+                    <div class="canvas-container-box">
+                        <h3><i class="fa-solid fa-mask"></i> Hasil Deteksi Sobel</h3>
+                        <canvas id="canvasSobel"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div id="laporan" class="card" style="display:none;">
-            <h2>Laporan Hasil Deteksi Sobel</h2>
-            <table>
-                <tr>
-                    <th width="30%">Tanggal Analisis</th>
-                    <td id="tanggalLaporan">-</td>
-                </tr>
-                <tr>
-                    <th>Nama File</th>
-                    <td id="namaFile">-</td>
-                </tr>
-                <tr>
-                    <th>Dimensi Gambar</th>
-                    <td id="dimensiGambar">-</td>
-                </tr>
-                <tr>
-                    <th>Metode</th>
-                    <td>Sobel Edge Detection (3x3 Kernel)</td>
-                </tr>
-                <tr>
-                    <th>Status</th>
-                    <td id="statusAnalisis" style="font-weight: bold; color: #b91c1c;">Belum Diproses</td>
-                </tr>
-            </table>
-            <br>
-            <button class="btn btn-success" onclick="window.print()">🖨 Cetak Laporan</button>
+        <div id="view-galeri" class="dashboard-view">
+            <header>
+                <div class="title">
+                    <h1>Galeri Hasil Unduhan</h1>
+                    <p>Daftar berkas gambar hasil deteksi sobel yang berhasil tersimpan di sistem & komputer</p>
+                </div>
+            </header>
+            <div class="panel-card">
+                <h2><i class="fa-solid fa-folder-closed"></i> Berkas Terunduh</h2>
+                <div class="gallery-grid" id="galleryContainer"></div>
+                <p class="info-text" id="emptyGalleryText">Belum ada foto Sobel yang diunduh.</p>
+            </div>
         </div>
 
-        <div id="about" class="card" style="display:none;">
-            <h2>Tentang Sistem</h2>
-            <p>Sistem ini dirancang untuk melakukan ekstraksi fitur atau pendeteksian tepi (edge detection) pada gambar digital menggunakan <b>Operator Sobel</b>.</p>
-            <p style="margin-top: 10px;">Operator Sobel melakukan komputasi estimasi gradien intensitas gambar secara spasial 2-Dimensi menggunakan dua buah kernel matriks berukuran 3x3 untuk arah Horizontal (Gx) dan Vertikal (Gy).</p>
+        <div id="view-laporan" class="dashboard-view">
+            <header>
+                <div class="title">
+                    <h1>Laporan Analisis Citra</h1>
+                    <p>Metrik komputasi performa ekstraksi tepi citra</p>
+                </div>
+            </header>
+            <div class="panel-card">
+                <h2><i class="fa-solid fa-chart-bar"></i> Statistik Hasil Pemrosesan Terakhir</h2>
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th>Parameter Metrik</th>
+                            <th>Nilai Analisis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Nama Berkas Gambar</td>
+                            <td id="repFileName">-</td>
+                        </tr>
+                        <tr>
+                            <td>Waktu Eksekusi Algoritma</td>
+                            <td id="repExecTime" style="color:var(--accent-neon); font-weight:700;">- ms</td>
+                        </tr>
+                        <tr>
+                            <td>Resolusi Kanvas Kerja</td>
+                            <td id="repResolution">-</td>
+                        </tr>
+                        <tr>
+                            <td>Kepadatan Piksel Tepi Terdeteksi</td>
+                            <td id="repDensity">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="view-tentang" class="dashboard-view">
+            <header>
+                <div class="title">
+                    <h1>Tentang Aplikasi</h1>
+                    <p>Informasi dasar mengenai algoritma Sobel Vision Dashboard</p>
+                </div>
+            </header>
+            <div class="panel-card">
+                <h2><i class="fa-solid fa-graduation-cap"></i> Teori Konvolusi Sobel</h2>
+                <p class="info-text" style="margin-bottom: 15px;">
+                    Algoritma Sobel mendeteksi komponen tepi dengan menghitung magnitudo gradien intensitas kecerahan warna gambar. Melalui konvolusi matriks kernel horizontal (Gx) dan vertikal (Gy), perubahan kontras tajam antar piksel diisolasi untuk memisahkan garis objek dengan latar belakang.
+                </p>
+                <p class="info-text" style="color: var(--accent-neon); font-weight: 600;">
+                    <i class="fa-solid fa-code"></i> Developer Build: v3.2.0 (Real-time Normalization Fixed)
+                </p>
+            </div>
         </div>
 
     </div>
-</div>
 
-<script>
-// AUTHENTICATION
-function login(){
-    let user = document.getElementById("username").value;
-    let pass = document.getElementById("password").value;
+    <script>
+        let originalImg = null;
+        let currentFileName = "";
 
-    if(user === "admin" && pass === "12345"){
-        document.getElementById("loginPage").style.display = "none";
-        document.getElementById("dashboard").style.display = "block";
-    } else {
-        alert("Username atau Password Salah!");
-    }
-}
+        const kx = [-1, 0, 1, -2, 0, 2, -1, 0, 1];
+        const ky = [-1, -2, -1, 0, 0, 0, 1, 2, 1];
 
-function logout(){
-    document.getElementById("dashboard").style.display = "none";
-    document.getElementById("loginPage").style.display = "flex";
-    // Reset inputs
-    document.getElementById("username").value = "";
-    document.getElementById("password").value = "";
-}
+        // Navigasi Tab Menu
+        const menuItems = document.querySelectorAll('.menu-list .menu-item');
+        const views = document.querySelectorAll('.dashboard-view');
 
-// NAVIGATION
-function showPage(page){
-    const pages = ['home', 'sobel', 'laporan', 'about'];
-    pages.forEach(p => {
-        document.getElementById(p).style.display = "none";
-        document.getElementById('menu-' + p).classList.remove('active');
-    });
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                menuItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                views.forEach(v => v.classList.remove('active-view'));
+                
+                const targetViewId = item.getAttribute('data-target');
+                document.getElementById(targetViewId).classList.add('active-view');
+            });
+        });
 
-    document.getElementById(page).style.display = "block";
-    document.getElementById('menu-' + page).classList.add('active');
-}
+        const fileInput = document.getElementById('fileInput');
+        const uploadText = document.getElementById('uploadText');
+        const thresholdSlider = document.getElementById('thresholdSlider');
+        const threshVal = document.getElementById('threshVal');
+        const invertToggle = document.getElementById('invertToggle');
+        const downloadBtn = document.getElementById('downloadBtn');
 
-// IMAGE LOADING & CORE PROCESSING
-const imageInput = document.getElementById("imageInput");
-const originalCanvas = document.getElementById("originalCanvas");
-const sobelCanvas = document.getElementById("sobelCanvas");
-const ctx1 = originalCanvas.getContext("2d");
-const ctx2 = sobelCanvas.getContext("2d");
+        const canvasOrig = document.getElementById('canvasOriginal');
+        const canvasSobel = document.getElementById('canvasSobel');
+        const ctxOrig = canvasOrig.getContext('2d');
+        const ctxSobel = canvasSobel.getContext('2d');
 
-let namaFileUpload = "";
-let img = new Image();
-let imageLoaded = false;
+        const repFileName = document.getElementById('repFileName');
+        const repExecTime = document.getElementById('repExecTime');
+        const repResolution = document.getElementById('repResolution');
+        const repDensity = document.getElementById('repDensity');
+        const galleryContainer = document.getElementById('galleryContainer');
+        const emptyGalleryText = document.getElementById('emptyGalleryText');
 
-imageInput.addEventListener("change", function(e){
-    let file = e.target.files[0];
-    if(!file) return;
+        // Geser slider atau klik invert langsung memproses otomatis (Real-time)
+        thresholdSlider.addEventListener('input', (e) => {
+            threshVal.textContent = e.target.value;
+            if(originalImg) applySobel();
+        });
 
-    namaFileUpload = file.name;
-    let reader = new FileReader();
+        invertToggle.addEventListener('change', () => {
+            if(originalImg) applySobel();
+        });
 
-    reader.onload = function(event){
-        img.onload = function(){
-            // Batasi ukuran maksimal tampilan canvas agar tidak terlalu raksasa di layar
-            let maxW = 600;
-            let scale = Math.min(1, maxW / img.width);
-            
-            originalCanvas.width = img.width * scale;
-            originalCanvas.height = img.height * scale;
-            sobelCanvas.width = img.width * scale;
-            sobelCanvas.height = img.height * scale;
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) handleFile(e.target.files[0]);
+        });
 
-            ctx1.drawImage(img, 0, 0, originalCanvas.width, originalCanvas.height);
-            // Reset canvas sobel ke kosong jika ganti gambar baru
-            ctx2.clearRect(0, 0, sobelCanvas.width, sobelCanvas.height);
-            imageLoaded = true;
+        function handleFile(file) {
+            currentFileName = file.name;
+            uploadText.textContent = file.name;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                originalImg = new Image();
+                originalImg.onload = function() {
+                    const maxW = 500;
+                    const scale = maxW / originalImg.width;
+                    canvasOrig.width = maxW;
+                    canvasOrig.height = originalImg.height * scale;
+                    canvasSobel.width = canvasOrig.width;
+                    canvasSobel.height = canvasOrig.height;
 
-            // Reset status laporan sementara
-            document.getElementById("statusAnalisis").innerHTML = "Belum Diproses";
-            document.getElementById("statusAnalisis").style.color = "#b91c1c";
+                    ctxOrig.drawImage(originalImg, 0, 0, canvasOrig.width, canvasOrig.height);
+                    ctxSobel.clearRect(0, 0, canvasSobel.width, canvasSobel.height);
+
+                    downloadBtn.disabled = true;
+                    
+                    // Langsung jalankan sobel pertama kali foto dimuat
+                    applySobel();
+                }
+                originalImg.src = event.target.result;
+            }
+            reader.readAsDataURL(file);
         }
-        img.src = event.target.result;
-    }
-    reader.readAsDataURL(file);
-});
 
-// REAL SOBEL EDGE DETECTION ALGORITHM
-function applySobel(){
-    if(!imageLoaded) {
-        alert("Silahkan unggah gambar terlebih dahulu!");
-        return;
-    }
-
-    const w = originalCanvas.width;
-    const h = originalCanvas.height;
-
-    // Ambil data pixel gambar asli
-    const imgData = ctx1.getImageData(0, 0, w, h);
-    const pixels = imgData.data;
-
-    // Buat wadah baru untuk menyimpan output hasil sobel
-    const outputData = ctx2.createImageData(w, h);
-    const outputPixels = outputData.data;
-
-    // Kernel Matriks Sobel
-    const Gx = [
-        [-1, 0, 1],
-        [-2, 0, 2],
-        [-1, 0, 1]
-    ];
-    const Gy = [
-        [-1, -2, -1],
-        [ 0,  0,  0],
-        [ 1,  2,  1]
-    ];
-
-    // Iterasi pixel (lewati bagian border terluar 1px untuk menghindari overflow koordinat kernel)
-    for (let y = 1; y < h - 1; y++) {
-        for (let x = 1; x < w - 1; x++) {
+        // --- CORE ALGORITMA SOBEL BARU DENGAN NORMALISASI GRADIENT (0 - 255) ---
+        function applySobel() {
+            if(!originalImg) return;
             
-            let valX = 0;
-            let valY = 0;
+            const t0 = performance.now(); 
 
-            // Konvolusi Matriks 3x3
-            for (let ky = -1; ky <= 1; ky++) {
-                for (let kx = -1; kx <= 1; kx++) {
-                    
-                    // Hitung index pixel tetangga
-                    let pixelIdx = ((y + ky) * w + (x + kx)) * 4;
-                    
-                    // Mengubah warna RGB ke Grayscale (Luminance formula)
-                    let r = pixels[pixelIdx];
-                    let g = pixels[pixelIdx + 1];
-                    let b = pixels[pixelIdx + 2];
-                    let gray = 0.299 * r + 0.587 * g + 0.114 * b;
+            const w = canvasOrig.width;
+            const h = canvasOrig.height;
+            
+            const imgData = ctxOrig.getImageData(0, 0, w, h);
+            const pixels = imgData.data;
+            
+            // 1. Ubah Gambar ke Grayscale
+            const grayPixels = new Uint8Array(w * h);
+            for (let i = 0; i < pixels.length; i += 4) {
+                grayPixels[i / 4] = Math.round(0.299 * pixels[i] + 0.587 * pixels[i + 1] + 0.114 * pixels[i + 2]);
+            }
+            
+            const outputData = ctxSobel.createImageData(w, h);
+            const outputPixels = outputData.data;
 
-                    valX += gray * Gx[ky + 1][kx + 1];
-                    valY += gray * Gy[ky + 1][kx + 1];
+            const currentThreshold = parseInt(thresholdSlider.value);
+            const isInverted = invertToggle.checked; 
+            
+            // Buat buffer array sementara untuk menampung nilai magnitudo mentah
+            const rawMagnitudes = new Float32Array(w * h);
+            let maxMagnitude = 0;
+
+            // 2. Tahap Pertama: Hitung semua magnitudo konvolusi Gx & Gy
+            for (let y = 1; y < h - 1; y++) {
+                for (let x = 1; x < w - 1; x++) {
+                    let resX = 0;
+                    let resY = 0;
+
+                    for (let kyIdx = -1; kyIdx <= 1; kyIdx++) {
+                        for (let kxIdx = -1; kxIdx <= 1; kxIdx++) {
+                            const pixelPos = (y + kyIdx) * w + (x + kxIdx);
+                            const g = grayPixels[pixelPos]; 
+                            const kernelIdx = (kyIdx + 1) * 3 + (kxIdx + 1);
+                            
+                            resX += g * kx[kernelIdx];
+                            resY += g * ky[kernelIdx];
+                        }
+                    }
+
+                    const mag = Math.sqrt(resX * resX + resY * resY);
+                    rawMagnitudes[y * w + x] = mag;
+                    if (mag > maxMagnitude) maxMagnitude = mag;
                 }
             }
 
-            // Hitung magnitudo total gradien teorema pythagoras: magnitudo = sqrt(Gx^2 + Gy^2)
-            let magnitude = Math.sqrt((valX * valX) + (valY * valY));
+            // Cegah pembagian dengan angka nol jika gambar kosong polos
+            if (maxMagnitude === 0) maxMagnitude = 1;
+
+            let edgePixelCount = 0;
+            let totalInnerPixels = 0;
+
+            // 3. Tahap Kedua: Normalisasi Magnitudo ke Rentang 0-255 & Terapkan Threshold + Invert
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const idx = (y * w + x) * 4;
+
+                    // Beri warna area bingkai tepi luar kanvas
+                    if (y === 0 || y === h - 1 || x === 0 || x === w - 1) {
+                        let borderColor = isInverted ? 255 : 0;
+                        outputPixels[idx]     = borderColor;
+                        outputPixels[idx + 1] = borderColor;
+                        outputPixels[idx + 2] = borderColor;
+                        outputPixels[idx + 3] = 255;
+                        continue;
+                    }
+
+                    totalInnerPixels++;
+                    
+                    // Skala magnitudo diubah paksa ke rentang 0-255 agar singkron dengan slider
+                    const normalizedMag = (rawMagnitudes[y * w + x] / maxMagnitude) * 255;
+                    
+                    // PENENTUAN FILTRASI AMBANG BATAS
+                    const isEdge = normalizedMag >= currentThreshold;
+                    if (isEdge) edgePixelCount++;
+
+                    // PENENTUAN FILTRASI WARNA BALIK (INVERT)
+                    let finalPixelColor;
+                    if (isInverted) {
+                        finalPixelColor = isEdge ? 0 : 255;  // Invert aktif: Garis tepi hitam, latar putih
+                    } else {
+                        finalPixelColor = isEdge ? 255 : 0;  // Normal: Garis tepi putih, latar hitam
+                    }
+
+                    outputPixels[idx]     = finalPixelColor;     
+                    outputPixels[idx + 1] = finalPixelColor;   
+                    outputPixels[idx + 2] = finalPixelColor;   
+                    outputPixels[idx + 3] = 255;         
+                }
+            }
+
+            // Render hasil akhir ke kanvas kanan
+            ctxSobel.putImageData(outputData, 0, 0);
+            downloadBtn.disabled = false;
+
+            const t1 = performance.now(); 
             
-            // Threshold / nilai batas (bisa dinaikkan jika ingin mengurangi noise)
-            magnitude = magnitude > 255 ? 255 : magnitude;
-
-            // Set ke pixel output canvas kedua (Hasil Grayscale Sobel Edge)
-            let currentIdx = (y * w + x) * 4;
-            outputPixels[currentIdx]     = magnitude; // Red
-            outputPixels[currentIdx + 1] = magnitude; // Green
-            outputPixels[currentIdx + 2] = magnitude; // Blue
-            outputPixels[currentIdx + 3] = 255;       // Alpha (Opacity penuh)
+            // Update tabel statistik laporan analisis ilmiah
+            repFileName.textContent = currentFileName;
+            repExecTime.textContent = ((t1 - t0).toFixed(2)) + " ms";
+            repResolution.textContent = `${w} x ${h} Px`;
+            repDensity.textContent = ((edgePixelCount / totalInnerPixels) * 100).toFixed(2) + " %";
         }
-    }
 
-    // Tulis data hasil olahan ke canvas sobel
-    ctx2.putImageData(outputData, 0, 0);
+        // Fungsi Simpan / Download Berkas ke Galeri
+        downloadBtn.addEventListener('click', () => {
+            const dataUrlOutput = canvasSobel.toDataURL("image/png");
+            const downloadName = 'sobel-' + currentFileName.split('.')[0] + '.png';
 
-    // ISI KE HALAMAN LAPORAN
-    document.getElementById("tanggalLaporan").innerHTML = new Date().toLocaleString("id-ID");
-    document.getElementById("namaFile").innerHTML = namaFileUpload;
-    document.getElementById("dimensiGambar").innerHTML = `${img.width} x ${img.height} px`;
-    document.getElementById("statusAnalisis").innerHTML = "Berhasil Diproses";
-    document.getElementById("statusAnalisis").style.color = "#10b981";
+            const link = document.createElement('a');
+            link.download = downloadName;
+            link.href = dataUrlOutput;
+            link.click();
 
-    alert("Proses Operator Sobel berhasil diselesaikan!");
-}
-</script>
+            if(emptyGalleryText) emptyGalleryText.style.display = 'none';
 
+            const card = document.createElement('div');
+            card.className = 'gallery-item-card';
+            
+            const waktuSekarang = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+            
+            card.innerHTML = `
+                <img src="${dataUrlOutput}" alt="Hasil Sobel">
+                <strong>${downloadName}</strong>
+                <span>Pukul ${waktuSekarang} WITA</span>
+            `;
+            
+            galleryContainer.appendChild(card);
+            alert("Gambar berhasil diunduh ke folder komputer & masuk ke Menu Galeri!");
+        });
+    </script>
 </body>
 </html>
